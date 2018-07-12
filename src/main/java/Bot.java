@@ -2,6 +2,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import org.telegram.abilitybots.api.bot.AbilityBot;
 import org.telegram.abilitybots.api.objects.Ability;
+import org.telegram.abilitybots.api.objects.EndUser;
 import org.telegram.abilitybots.api.objects.MessageContext;
 import org.telegram.telegrambots.api.methods.groupadministration.GetChatMember;
 import org.telegram.telegrambots.api.methods.send.SendMessage;
@@ -10,13 +11,12 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import javax.naming.Context;
-import java.util.Comparator;
-import java.util.Timer;
-import java.util.TimerTask;
+import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import static org.telegram.abilitybots.api.objects.Locality.USER;
 import static org.telegram.abilitybots.api.objects.Privacy.ADMIN;
+import static org.telegram.abilitybots.api.objects.Privacy.CREATOR;
 import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 
 
@@ -78,9 +78,9 @@ public class Bot extends AbilityBot {
         }
     }
 
-    private void fromQueueToResource(){
+    private void fromQueueToResource() {
         Task task = myQueue.poll();
-        if(task == null){
+        if (task == null) {
             return;
         }
         myResources.add(task);
@@ -97,7 +97,7 @@ public class Bot extends AbilityBot {
 
     @NotNull
     private String takeTask(Task task) {
-        if(task == null){
+        if (task == null) {
             return "no task";
         }
         if (myResources.size() < resourcesCount) {
@@ -130,24 +130,24 @@ public class Bot extends AbilityBot {
             return myQueue.peek().chatMember.getUser().getUserName();
     }
 
-    private String updateResources(MessageContext ctx){
+    private String updateResources(MessageContext ctx) {
         int newResourceCount = Integer.parseInt(ctx.arguments()[0]);
         int dif = newResourceCount - resourcesCount;
         resourcesCount = newResourceCount;
-       if(dif < 0){
-           while (!myResources.isEmpty() && dif < 0){
-               //returns null if this queue is empty.
-               Task task = myResources.poll();
-               sendMsg(task.chatMember.getUser().getId().toString(),takeTask(task));
-               ++dif;
-           }
-       }else if(dif > 0){
-           while(!myQueue.isEmpty() && dif > 0){
-               --dif;
-               fromQueueToResource();
-           }
-       }
-       return "Resources updated";
+        if (dif < 0) {
+            while (!myResources.isEmpty() && dif < 0) {
+                //returns null if this queue is empty.
+                Task task = myResources.poll();
+                sendMsg(task.chatMember.getUser().getId().toString(), takeTask(task));
+                ++dif;
+            }
+        } else if (dif > 0) {
+            while (!myQueue.isEmpty() && dif > 0) {
+                --dif;
+                fromQueueToResource();
+            }
+        }
+        return "Resources updated";
     }
 
     public Ability replyToGetInQ() {
@@ -172,7 +172,9 @@ public class Bot extends AbilityBot {
                 .input(1)
                 .locality(USER)
                 .privacy(ADMIN)
-                .action(ctx -> silent.send(updateResources(ctx), ctx.chatId()))
+                .action(ctx -> {
+                    silent.send(updateResources(ctx), ctx.chatId());
+                })
                 .build();
     }
 
@@ -184,6 +186,78 @@ public class Bot extends AbilityBot {
                 .locality(USER)
                 .privacy(PUBLIC)
                 .action(ctx -> silent.send(getFirst(ctx), ctx.chatId()))
+                .build();
+    }
+
+    public Ability replyToAdmins() {
+        return Ability
+                .builder()
+                .name("admins")
+                .info("Tell who the admins")
+                .locality(USER)
+                .privacy(PUBLIC)
+                .action(ctx -> {
+                    //TODO make in one message
+                    if(admins().isEmpty()){
+                        silent.send("no admins", ctx.chatId());
+                    }else {
+                        for (Integer item : admins()) {
+                            silent.send("id:" + item, ctx.chatId());
+                        }
+                    }
+                })
+                .build();
+    }
+
+    public Ability replyToUsers() {
+        return Ability
+                .builder()
+                .name("users")
+                .info("Show all users")
+                .locality(USER)
+                .privacy(PUBLIC)
+                .action(ctx -> {
+                    //TODO make in one message
+                    for(Map.Entry<Integer,EndUser> item :users().entrySet()) {
+                        silent.send("id:" + item.getKey() + " " + item.getValue().firstName(), ctx.chatId());
+                    }
+                })
+                .build();
+    }
+
+    public Ability replyToAddAd() {
+        return Ability
+                .builder()
+                .name("addAd")
+                .info("Add admin")
+                .locality(USER)
+                .privacy(CREATOR)
+                .input(1)
+                .action(ctx -> {
+                    if(admins().add(Integer.parseInt(ctx.arguments()[0]))){
+                        silent.send("user with this id  already have admin ", ctx.chatId());
+                    }else {
+                        silent.send("added", ctx.chatId());
+                    }
+                })
+                .build();
+    }
+
+    public Ability replyToRmvAd() {
+        return Ability
+                .builder()
+                .name("rmvAd")
+                .info("remove admin")
+                .locality(USER)
+                .input(1)
+                .privacy(CREATOR)
+                .action(ctx -> {
+                    if(admins().remove(Integer.parseInt(ctx.arguments()[0]))){
+                        silent.send("deleted", ctx.chatId());
+                    }else {
+                        silent.send("user with this id is not admin", ctx.chatId());
+                    }
+                })
                 .build();
     }
 

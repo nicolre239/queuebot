@@ -23,8 +23,8 @@ public class Main {
             DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
 
             // Proxy
-            final String PROXY_HOST = "173.249.48.140" /* proxy host */;
-            final Integer PROXY_PORT = 8080 /* proxy port */;
+            final String PROXY_HOST = "206.81.5.117" /* proxy host */;
+            final Integer PROXY_PORT = 3128 /* proxy port */;
             HttpHost httpHost = new HttpHost(PROXY_HOST, PROXY_PORT);
             RequestConfig requestConfig = RequestConfig.custom().setProxy(httpHost).setAuthenticationEnabled(false).build();
             botOptions.setRequestConfig(requestConfig);
