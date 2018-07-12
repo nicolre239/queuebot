@@ -76,7 +76,7 @@ public class Bot extends AbilityBot {
         }
     }
 
-    void fromQueueToResource(){
+    private void fromQueueToResource(){
         Task task = myQueue.poll();
         if(task == null){
             return;
@@ -148,11 +148,11 @@ public class Bot extends AbilityBot {
        return "Resources update";
     }
 
-    public Ability getIn() {
+    public Ability replyToGetInQueue() {
         //todo check priority from 1-3
         return Ability
                 .builder()
-                .name("getin")
+                .name("getInQueue")
                 .info("Sets you in myQueue to resource")
                 .input(1)
                 .locality(USER)
@@ -161,11 +161,11 @@ public class Bot extends AbilityBot {
                 .build();
     }
 
-    public Ability updateResources() {
+    public Ability replyToUpdateResources() {
         //todo check priority from 1-3
         return Ability
                 .builder()
-                .name("updR")
+                .name("updResources")
                 .info("Set new resources count")
                 .input(1)
                 .locality(USER)
@@ -174,11 +174,11 @@ public class Bot extends AbilityBot {
                 .build();
     }
 
-    public Ability getFirst() {
+    public Ability replyToGetFirst() {
         return Ability
                 .builder()
-                .name("whoison")
-                .info("Tells who is on resource now")
+                .name("getFirst")
+                .info("Tells who the first on queue now")
                 .locality(USER)
                 .privacy(PUBLIC)
                 .action(ctx -> silent.send(getFirst(ctx), ctx.chatId()))
