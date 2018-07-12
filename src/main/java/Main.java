@@ -34,9 +34,9 @@ public class Main {
             Bot bot = new Bot(BotConstants.BOT_TOKEN, BotConstants.BOT_NAME, botOptions);
             botsApi.registerBot(bot);
 
-        } catch (Exception ie) {
+        } catch (Exception e) {
             ///all exception
-            ie.printStackTrace();
+            e.printStackTrace();
         }
     }
 }
