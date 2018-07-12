@@ -11,6 +11,7 @@ import org.telegram.telegrambots.bots.DefaultBotOptions;
 import org.telegram.telegrambots.exceptions.TelegramApiException;
 
 import javax.naming.Context;
+import java.time.Instant;
 import java.util.*;
 import java.util.concurrent.PriorityBlockingQueue;
 
@@ -85,8 +86,8 @@ public class Bot extends AbilityBot {
         }
         myResources.add(task);
         sendMsg(task.chatMember.getUser().getId().toString(), "your task on resource");
-        Timer timer = new Timer();
-        timer.schedule(new MyTimerTask(task), BotConstants.timeOnResource);
+        task.timer = new Timer();
+        task.timer.schedule(new MyTimerTask(task), BotConstants.timeOnResource);
     }
 
     private void OnResource(Task task) {
@@ -96,36 +97,39 @@ public class Bot extends AbilityBot {
     }
 
     @NotNull
-    private String takeTask(Task task) {
-        if (task == null) {
-            return "no task";
-        }
-        if (myResources.size() < resourcesCount) {
-            myResources.add(task);
-            Timer myTimer = new Timer();
-            myTimer.schedule(new MyTimerTask(task), BotConstants.timeOnResource);
-            return "You are on resource";
-        }
-        myQueue.add(task);
-        return "You are on queue";
-    }
-
-    @NotNull
     private String getIn(MessageContext ctx) {
         ChatMember chatMember = getMember(ctx.user().id(), ctx.chatId());
         if (chatMember == null) {
             return "no member";
         }
         int priority = Integer.parseInt(ctx.arguments()[0]);
-        Task task = new Task(chatMember, priority);
+        Task task = new Task(chatMember, priority,BotConstants.timeOnResource);
         return takeTask(task);
+    }
+
+    @NotNull
+    private String takeTask(Task task) {
+        if (task == null) {
+            return "no task";
+        }
+        if (myResources.size() < resourcesCount) {
+            myResources.add(task);
+            task.timer = new Timer();
+            task.timer.schedule(new MyTimerTask(task), BotConstants.timeOnResource);
+            return "You are on resource";
+        }
+        else if(task.priority > myResources.peek().priority){
+            return changeQR(task);
+        }
+        myQueue.add(task);
+        return "You are on queue";
     }
 
     private String getFirst(MessageContext ctx) {
         if (myQueue.isEmpty())
             return "Nobody";
         else if (ctx.user().id() == myQueue.peek().chatMember.getUser().getId())
-            return "You are on, stupid monkey";
+            return "You are on, stupid monkey " + myQueue.peek().priority + " " + myQueue.peek().duration;
         else
             return myQueue.peek().chatMember.getUser().getUserName();
     }
@@ -148,6 +152,21 @@ public class Bot extends AbilityBot {
             }
         }
         return "Resources updated";
+    }
+
+    private String changeQR(Task task){
+        if(myResources.isEmpty()){
+            return "empty resources";
+        }
+
+        Task tmp = myResources.poll();
+        tmp.timer.cancel();
+        long dif = tmp.endTime.getEpochSecond();
+        dif -= Instant.now().getEpochSecond();
+        tmp.reSetEndTime(dif);
+        myQueue.add(tmp);
+        sendMsg(tmp.chatMember.getUser().getId().toString(), "your now is queue, your priority too low");
+        return takeTask(task);
     }
 
     public Ability replyToGetInQ() {
