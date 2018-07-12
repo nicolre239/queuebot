@@ -16,6 +16,7 @@ import java.util.TimerTask;
 import java.util.concurrent.PriorityBlockingQueue;
 
 import static org.telegram.abilitybots.api.objects.Locality.USER;
+import static org.telegram.abilitybots.api.objects.Privacy.ADMIN;
 import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 
 
@@ -34,6 +35,7 @@ public class Bot extends AbilityBot {
     }
 
     private int resourcesCount = BotConstants.STANDART_RESOURCES_COUNT;
+
     private static Comparator<Task> maxComparator = new Comparator<Task>() {
         @Override
         public int compare(Task t1, Task t2) {
@@ -145,7 +147,7 @@ public class Bot extends AbilityBot {
                fromQueueToResource();
            }
        }
-       return "Resources update";
+       return "Resources updated";
     }
 
     public Ability replyToGetInQ() {
@@ -169,7 +171,7 @@ public class Bot extends AbilityBot {
                 .info("Set new resources count")
                 .input(1)
                 .locality(USER)
-                .privacy(PUBLIC)
+                .privacy(ADMIN)
                 .action(ctx -> silent.send(updateResources(ctx), ctx.chatId()))
                 .build();
     }
@@ -185,13 +187,11 @@ public class Bot extends AbilityBot {
                 .build();
     }
 
-
-
     public Bot(String botToken, String botUsername, DefaultBotOptions botOptions) {
         super(botToken, botUsername, botOptions);
     }
 
     public int creatorId() {
-        return 0;
+        return BotConstants.CREATOR_ID;
     }
 }

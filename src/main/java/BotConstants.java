@@ -5,4 +5,5 @@ public interface BotConstants {
     int timeOnResource = 10000;
     int timeRepeatRequest = 15000;
     int STANDART_RESOURCES_COUNT = 2;
+    int CREATOR_ID = 347873294;
 }
