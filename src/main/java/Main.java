@@ -23,8 +23,8 @@ public class Main {
             DefaultBotOptions botOptions = ApiContext.getInstance(DefaultBotOptions.class);
 
             // Proxy
-            final String PROXY_HOST = "173.249.48.140" /* proxy host */;
-            final Integer PROXY_PORT = 8080 /* proxy port */;
+            final String PROXY_HOST = "92.222.64.145" /* proxy host */;
+            final Integer PROXY_PORT = 3128 /* proxy port */;
             HttpHost httpHost = new HttpHost(PROXY_HOST, PROXY_PORT);
             RequestConfig requestConfig = RequestConfig.custom().setProxy(httpHost).setAuthenticationEnabled(false).build();
             botOptions.setRequestConfig(requestConfig);
@@ -34,9 +34,9 @@ public class Main {
             Bot bot = new Bot(BotConstants.BOT_TOKEN, BotConstants.BOT_NAME, botOptions);
             botsApi.registerBot(bot);
 
-        } catch (Exception ie) {
+        } catch (Exception e) {
             ///all exception
-            ie.printStackTrace();
+            e.printStackTrace();
         }
     }
 }
