@@ -14,8 +14,15 @@ public class Task {
         endTime = Instant.now();
         this.duration = duration;
         endTime = endTime.plusMillis(duration);
-        this.priority = priority;
         this.chatMember = chatMember;
+
+        if (priority > 3)
+            priority = 3;
+
+        if (priority < 0)
+            priority = 0;
+
+        this.priority = priority;
     }
 
     Instant reSetEndTime(long duration){
