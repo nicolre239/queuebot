@@ -1,20 +1,17 @@
-import org.telegram.telegrambots.api.objects.ChatMember;
-
 import java.time.Instant;
 import java.util.Timer;
 
-
-public class Task {
+class Task {
     int priority;
-    final ChatMember chatMember;
+    final User user;
     Instant endTime;
     Timer timer;
     long duration;
-    Task(ChatMember chatMember,int priority,long duration){
+    Task(User user,int priority,long duration){
         endTime = Instant.now();
         this.duration = duration;
         endTime = endTime.plusMillis(duration);
-        this.chatMember = chatMember;
+        this.user = user;
 
         if (priority > 3)
             priority = 3;

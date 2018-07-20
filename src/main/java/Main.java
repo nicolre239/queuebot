@@ -31,8 +31,8 @@ public class Main {
             botOptions.setHttpProxy(httpHost);
 
             // Register your newly created AbilityBot
-            Bot bot = new Bot(BotConstants.BOT_TOKEN, BotConstants.BOT_NAME, botOptions);
-            botsApi.registerBot(bot);
+            TelegramBot telegramBot = new TelegramBot(BotConstants.BOT_TOKEN, BotConstants.BOT_NAME, botOptions);
+            botsApi.registerBot(telegramBot);
 
         } catch (Exception e) {
             ///all exception
